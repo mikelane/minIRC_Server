@@ -30,11 +30,7 @@ configs.read('settings.ini')
 HOST = configs['SERVER']['HOST']
 PORT = configs['SERVER']['PORT']
 
-channels = {
-    'test1': Channel('test1', 'Admin'),
-    'test2': Channel('test2', 'Admin'),
-    'test3': Channel('test3', 'Admin')
-}
+channels = {}
 
 users = {}
 
