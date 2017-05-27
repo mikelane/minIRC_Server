@@ -281,7 +281,8 @@ class Server(asyncio.Protocol):
 
     def connection_lost(self, exc):
         logger.debug(f'{str(self)} - Connection lost.')
-        self.quit()
+        if not self.transport.is_closing():  # Prevent calling quit twice
+            self.quit()
 
 
 if __name__ == '__main__':
