@@ -47,6 +47,7 @@ class Server(asyncio.Protocol):
         self.username = f'user_{self.client_counter}'  # A default username
         users[self.username] = self
         self.my_channels = {}
+        self.my_private_messages = {}
         self.dispatcher = {
             'LOGIN': self.login,
             'QUIT': self.quit,
@@ -137,18 +138,9 @@ class Server(asyncio.Protocol):
 
     def quit(self):
         global users
-        if not self.transport.is_closing():
-            logger.debug(f'{str(self)} - Quitting. Cleaning up user.')
-            self.ping_handler.cancel()
-            if self.username in users:
-                logger.debug(f'{str(self)} - Attempting to remove {self.username} from users')
-                logger.debug(f'{str(self)} - Before {[u for u in users]}')
-                del (users[self.username])
-                logger.debug(f'{str(self)} - After: {[u for u in users]}')
-            self.remove_user_from_channels()
-            logger.debug(f'{str(self)} - Closing the socket.')
-            self.transport.write(b'GOODBYE')
-            self.transport.close()
+        logger.debug(f'{str(self)} - Quit received. Closing the socket.')
+        self.transport.write(b'GOODBYE')
+        self.transport.close()
 
     def remove_user_from_channels(self):
         global channels
@@ -284,9 +276,14 @@ class Server(asyncio.Protocol):
                 self.send_response('ERROR', STATUS=404, MESSAGE=f'User {nick} not found.')
 
     def connection_lost(self, exc):
-        logger.debug(f'{str(self)} - Connection lost.')
-        logger.debug(f'{str(self)} - Calling quit')
-        self.quit()
+        logger.debug(f'{str(self)} - Connection lost. Cleaning up user.')
+        self.ping_handler.cancel()
+        if self.username in users:
+            logger.debug(f'{str(self)} - Attempting to remove {self.username} from users')
+            logger.debug(f'{str(self)} - Before {[u for u in users]}')
+            del (users[self.username])
+            logger.debug(f'{str(self)} - After: {[u for u in users]}')
+        self.remove_user_from_channels()
 
 
 if __name__ == '__main__':
