@@ -150,7 +150,7 @@ class Server(asyncio.Protocol):
         global channels
         logger.debug(f'{str(self)} - QUIT received. Cleaning up channels')
         to_remove = set()
-        for channel in channels.values():
+        for channel in self.my_channels.values():
             if channel.remove(self):  # True if no more users remain in the channel
                 to_remove |= {channel.name}
         for name in to_remove:  # Cull the empty channels.

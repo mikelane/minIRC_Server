@@ -42,9 +42,9 @@ class Channel:
         user.send_message({'CHANHIST': {'CHANNEL': self.name, }})
 
     def remove(self, user):
-        if len(self.users) == 1:
+        if len(self.users) == 1 and user == self.moderator:
             return True  # Just kill the room if nobody is left in it.
-        if user.username == self.moderator.username:
+        if user == self.moderator:
             # Setting an arbitrary user to be moderator probably isn't a good idea.
             self.moderator = self.users.pop()
         self.users ^= set([user])
