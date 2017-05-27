@@ -42,12 +42,13 @@ class Channel:
         user.send_message({'CHANHIST': {'CHANNEL': self.name, }})
 
     def remove(self, user):
-        if len(self.users) == 1 and user == self.moderator:
+        self.users ^= set([user])  # Remove the departing user
+        if len(self.users) == 0:
             return True  # Just kill the room if nobody is left in it.
-        if user == self.moderator:  # More than one user and the moderator is leaving
-            # Setting an arbitrary user to be moderator probably isn't a good idea.
-            self.moderator = self.users.pop()
-        self.users ^= set([user])
+        # Assign a random moderator - Not a great way to do this.
+        # TODO keep track of when users enter room and assign it that way.
+        self.moderator = self.users.pop()
+        self.users |= set([self.moderator])
 
     def broadcast(self, message, from_user):
         time = str(datetime.now())

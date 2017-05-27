@@ -74,7 +74,7 @@ class Server(asyncio.Protocol):
     def make_response(self, command, kwargs):
         if not kwargs:
             kwargs = None
-        return json.dumps({command: kwargs}).encode()
+        return f'{json.dumps({command: kwargs})}\n'.encode()
 
     def send_response(self, command, **kwargs):
         response = self.make_response(command, kwargs)
@@ -82,7 +82,7 @@ class Server(asyncio.Protocol):
         self.loop.call_soon(self.transport.write, response)
 
     def send_message(self, response):
-        resp = json.dumps(response).encode()
+        resp = f'{json.dumps(response)}\n'.encode()
         logger.debug(f'{str(self)} - Sending the following response: {resp}')
         self.loop.call_soon(self.transport.write, resp)
 
@@ -94,25 +94,27 @@ class Server(asyncio.Protocol):
         self.ping_handler = self.loop.call_later(self.ping_delay, self.ping)
 
     def data_received(self, data):
-        data = data.strip().decode()
-        logger.debug(f'{str(self)} - Data received: {data}')
+        commands = data.strip().decode().split('\n')
         # This is where we parse the incoming messages and do things with them
-        if data == '{"PING": "PONG"}':
-            self.pong_received = True
-        else:
-            try:
-                parsed_message = json.loads(data)
-            except json.decoder.JSONDecodeError:
-                print(f'This is where I log something about ill-formed response')
-                return
-            command = next(iter(parsed_message))
-            kwargs = parsed_message[command]
-            callback = functools.partial(self.dispatcher[command], **(kwargs or {}))
-            self.loop.call_soon(callback=callback)
+        for command in commands:
+            logger.debug(f'{str(self)} - message received: {command}')
+            if command == '{"PING": "PONG"}':
+                self.pong_received = True
+            else:
+                try:
+                    parsed_message = json.loads(command)
+                except json.decoder.JSONDecodeError:
+                    # TODO send response to user.
+                    print(f'This is where I log something about ill-formed response')
+                    continue
+                command = next(iter(parsed_message))
+                kwargs = parsed_message[command]
+                callback = functools.partial(self.dispatcher[command], **(kwargs or {}))
+                self.loop.call_soon(callback=callback)
 
     def ping(self):
         self.pong_received = False
-        self.transport.write(b'{"PING": null}')
+        self.transport.write(b'{"PING": null}\n')
         logger.debug(f'{str(self)} - Sent PING')
         self.loop.call_later(1, self.check_pong)
 
