@@ -8,6 +8,7 @@ http://stackoverflow.com/questions/7621897/python-logging-module-globally"""
 
 # Imports
 import logging
+import os
 
 __author__ = "Michael Lane"
 __email__ = "mikelane@gmail.com"
@@ -21,7 +22,8 @@ def setup_custom_logger(name, level):
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
-    file_handler = logging.FileHandler('/Users/Mike/dev/minIRC_Server/logs/server.log')
+    os.makedirs('logs/', exist_ok=True)
+    file_handler = logging.FileHandler('logs/server.log')
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.DEBUG)  # Always log debug information
 
