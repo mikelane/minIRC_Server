@@ -137,17 +137,18 @@ class Server(asyncio.Protocol):
 
     def quit(self):
         global users
-        logger.debug(f'{str(self)} - Quitting. Cleaning up user.')
-        self.ping_handler.cancel()
-        if self.username in users:
-            logger.debug(f'{str(self)} - Attempting to remove {self.username} from users')
-            logger.debug(f'{str(self)} - Before {[u for u in users]}')
-            del (users[self.username])
-            logger.debug(f'{str(self)} - After: {[u for u in users]}')
-        self.remove_user_from_channels()
-        logger.debug(f'{str(self)} - Closing the socket.')
-        self.transport.write(b'GOODBYE')
-        self.transport.close()
+        if not self.transport.is_closing():
+            logger.debug(f'{str(self)} - Quitting. Cleaning up user.')
+            self.ping_handler.cancel()
+            if self.username in users:
+                logger.debug(f'{str(self)} - Attempting to remove {self.username} from users')
+                logger.debug(f'{str(self)} - Before {[u for u in users]}')
+                del (users[self.username])
+                logger.debug(f'{str(self)} - After: {[u for u in users]}')
+            self.remove_user_from_channels()
+            logger.debug(f'{str(self)} - Closing the socket.')
+            self.transport.write(b'GOODBYE')
+            self.transport.close()
 
     def remove_user_from_channels(self):
         global channels
@@ -284,9 +285,8 @@ class Server(asyncio.Protocol):
 
     def connection_lost(self, exc):
         logger.debug(f'{str(self)} - Connection lost.')
-        if not self.transport.is_closing():  # Prevent calling quit twice
-            logger.debug(f'{str(self)} - Calling quit')
-            self.quit()
+        logger.debug(f'{str(self)} - Calling quit')
+        self.quit()
 
 
 if __name__ == '__main__':
