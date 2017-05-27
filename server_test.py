@@ -8,6 +8,7 @@ Long description
 
 # Imports
 import asyncio
+import configparser
 
 from minIRC_Server import log
 from minIRC_Server.server import Server
@@ -19,8 +20,10 @@ __license__ = "MIT"
 
 logger = log.setup_custom_logger('root', level=5)
 
-HOST = '127.0.0.1'
-PORT = 10101
+configs = configparser.ConfigParser()
+configs.read('settings.ini')
+HOST = configs['SERVER']['HOST']
+PORT = configs['SERVER']['PORT']
 
 channels = set()
 users = {}

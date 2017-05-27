@@ -12,6 +12,7 @@ import functools
 import json
 import logging
 import re
+import configparser
 
 from minIRC_Server import log
 from minIRC_Server.channel import Channel
@@ -21,11 +22,13 @@ __email__ = "mikelane@gmail.com"
 __copyright__ = "Copyright 2017, Michael Lane"
 __license__ = "MIT"
 
-HOST = '127.0.0.1'
-PORT = 10101
-
 logger = log.setup_custom_logger('root.server', level=5)
 logging.getLogger('asyncio').setLevel(logging.DEBUG)
+
+configs = configparser.ConfigParser()
+configs.read('settings.ini')
+HOST = configs['SERVER']['HOST']
+PORT = configs['SERVER']['PORT']
 
 channels = {
     'test1': Channel('test1', 'Admin'),
