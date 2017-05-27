@@ -44,7 +44,7 @@ class Channel:
     def remove(self, user):
         if len(self.users) == 1:
             return True  # Just kill the room if nobody is left in it.
-        if user.username == self.moderator:
+        if user.username == self.moderator.username:
             # Setting an arbitrary user to be moderator probably isn't a good idea.
             self.moderator = self.users.pop()
         self.users ^= set([user])
