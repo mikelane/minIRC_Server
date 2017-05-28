@@ -45,6 +45,7 @@ class Channel:
         self.users ^= set([user])  # Remove the departing user
         if len(self.users) == 0:
             return True  # Just kill the room if nobody is left in it.
+        self.broadcast(message='Quit', from_user=user.username)
         # Assign a random moderator - Not a great way to do this.
         # TODO keep track of when users enter room and assign it that way.
         self.moderator = self.users.pop()
