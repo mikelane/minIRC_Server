@@ -48,6 +48,7 @@ class Server(asyncio.Protocol):
         users[self.username] = self
         self.my_channels = {}
         self.my_private_messages = {}
+        self.file_transfer_port = 7777
         self.dispatcher = {
             'LOGIN': self.login,
             'QUIT': self.quit,
@@ -105,7 +106,7 @@ class Server(asyncio.Protocol):
                     parsed_message = json.loads(command)
                 except json.decoder.JSONDecodeError:
                     # TODO send response to user.
-                    print(f'This is where I log something about ill-formed response')
+                    logger.error('ERROR: JSONDecoderError')
                     continue
                 command = next(iter(parsed_message))
                 kwargs = parsed_message[command]
@@ -276,6 +277,13 @@ class Server(asyncio.Protocol):
                 self.send_response('SUCCESS', STATUS=200, MESSAGE=f'User {nick} kicked.')
             except KeyError:
                 self.send_response('ERROR', STATUS=404, MESSAGE=f'User {nick} not found.')
+
+    # def set_up_transfer_file(self, NICK):
+    #     transfer_port = self.file_transfer_port
+    #     self.file_transfer_port += 1
+    #     connection_info = {'PORT': transfer_port}
+    #     self.loop.call_soon(self.transport.write(json.loads({'SENDFILE': connection_info}).encode()))
+    #     self.loop.call_soon(users[NICK].transport.write(json.loads({'RECVFILE': connection_info}).encode()))
 
     def connection_lost(self, exc):
         logger.debug(f'{str(self)} - Connection lost. Cleaning up user.')
