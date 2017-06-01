@@ -166,3 +166,4 @@ Temporary Items
 
 /logs/server.log
 /settings.ini
+!/logs/server.log
